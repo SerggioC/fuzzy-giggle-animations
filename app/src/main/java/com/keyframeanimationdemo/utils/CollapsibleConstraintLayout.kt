@@ -7,10 +7,14 @@ import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.support.design.widget.AppBarLayout
 import android.util.AttributeSet
+import android.util.Log
+import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import com.keyframeanimationdemo.R
+import kotlinx.android.synthetic.main.toolbar_layout.view.*
+
 
 /**
  * Created by Bhavik Makwana on 13-03-2018.
@@ -20,7 +24,11 @@ class CollapsibleConstraintLayout : ConstraintLayout, AppBarLayout.OnOffsetChang
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttribute: Int) : super(context, attrs, defStyleAttribute)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttribute: Int) : super(
+        context,
+        attrs,
+        defStyleAttribute
+    )
 
 
     private var mTransitionThreshold = 0.35f
@@ -36,6 +44,9 @@ class CollapsibleConstraintLayout : ConstraintLayout, AppBarLayout.OnOffsetChang
     private var mTranslationIcon: AnimationHelper? = null
     private var showImageAnimator: Animator? = null
     private var hideImageAnimator: Animator? = null
+    private var iconInitialPosition: Float? = null
+    private var iconMaxPosition: Float? = null
+
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -52,6 +63,18 @@ class CollapsibleConstraintLayout : ConstraintLayout, AppBarLayout.OnOffsetChang
             showImageAnimator?.duration = 600
             hideImageAnimator = ObjectAnimator.ofFloat(mBackground, "alpha", 1f, 0f)
             hideImageAnimator?.duration = 600
+
+        }
+    }
+
+
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        if (parent is AppBarLayout) {
+            val appBarLayout = parent as AppBarLayout
+
+
         }
     }
 
@@ -59,22 +82,36 @@ class CollapsibleConstraintLayout : ConstraintLayout, AppBarLayout.OnOffsetChang
         if (mLastPosition == verticalOffset) {
             return
         }
+
+        if (iconInitialPosition == null) {
+            iconInitialPosition = iv_icon.x
+        }
+        if (iconMaxPosition == null) {
+            iconMaxPosition = appBarLayout?.width?.toFloat()
+        }
+
         mLastPosition = verticalOffset
-        val progress = Math.abs(verticalOffset / appBarLayout?.height?.toFloat()!!)
+        val progress = verticalOffset / appBarLayout?.height?.toFloat()!!
+
+        val iconProgress = (iconMaxPosition!! - iconInitialPosition!!) * progress
+        iv_icon?.x = -iconProgress + iconInitialPosition!!
+
+        Log.i("Sergio> ", "iconProgress: $iconProgress verticalOffset: $verticalOffset iconInitialPosition: $iconInitialPosition")
 
         val params = layoutParams as AppBarLayout.LayoutParams
         params.topMargin = -verticalOffset
         layoutParams = params
 
-        if (mToolBarOpen && progress > mTransitionThreshold) {
-            mCloseToolBarSet.applyTo(this)
-            hideImageAnimator?.start()
-            mToolBarOpen = false
-        } else if (!mToolBarOpen && progress < mTransitionThreshold) {
-            mOpenToolBarSet.applyTo(this)
-            showImageAnimator?.start()
-            mToolBarOpen = true
-        }
+//
+//        if (mToolBarOpen && progress > mTransitionThreshold) {
+//            mCloseToolBarSet.applyTo(this)
+//            hideImageAnimator?.start()
+//            mToolBarOpen = false
+//        } else if (!mToolBarOpen && progress < mTransitionThreshold) {
+//            mOpenToolBarSet.applyTo(this)
+//            showImageAnimator?.start()
+//            mToolBarOpen = true
+//        }
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
@@ -107,4 +144,13 @@ class CollapsibleConstraintLayout : ConstraintLayout, AppBarLayout.OnOffsetChang
             }
         }
     }
+
+    /** Converts dp into its equivalent px */
+    private fun dpToPx(dp: Float?) =
+        TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            dp ?: 0.0f,
+            resources.displayMetrics
+        )
 }
+

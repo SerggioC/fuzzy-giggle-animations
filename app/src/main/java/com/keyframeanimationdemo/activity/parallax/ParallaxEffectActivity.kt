@@ -56,7 +56,7 @@ class ParallaxEffectActivity : AppCompatActivity() {
                     val w = recyclerView.width
                     val deltaPos = offSet - (position + i) * w
                     val percent = deltaPos / w.toFloat()
-                    params.guidePercent = Math.max(0.3f, Math.min(0.7f, 0.5f - percent))
+                    params.guidePercent = Math.max(0.5f, Math.min(0.7f, 0.5f - percent))
                     guideline.layoutParams = params
                 }
             }
