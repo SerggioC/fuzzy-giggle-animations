@@ -43,9 +43,9 @@ class ParallaxEffectActivity : AppCompatActivity() {
         recycler_view.adapter = Adapter(this, images)
 
         recycler_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                val manager = recyclerView!!.layoutManager as LinearLayoutManager
+                val manager = recyclerView.layoutManager as LinearLayoutManager
                 val position = manager.findFirstVisibleItemPosition()
                 val lastPosition = manager.findLastVisibleItemPosition()
                 val offSet = recyclerView.computeHorizontalScrollOffset()

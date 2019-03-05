@@ -15,11 +15,6 @@ import android.widget.TextView
 import com.keyframeanimationdemo.R
 import kotlinx.android.synthetic.main.toolbar_layout.view.*
 
-
-/**
- * Created by Bhavik Makwana on 13-03-2018.
- */
-
 class CollapsibleConstraintLayout : ConstraintLayout, AppBarLayout.OnOffsetChangedListener {
 
     constructor(context: Context) : this(context, null)
@@ -46,7 +41,9 @@ class CollapsibleConstraintLayout : ConstraintLayout, AppBarLayout.OnOffsetChang
     private var hideImageAnimator: Animator? = null
     private var iconInitialPosition: Float? = null
     private var iconMaxPosition: Float? = null
-
+    private var icon2InitialPosition: Float? = null
+    private var icon2MaxPosition: Float? = null
+    private var positionsInitialized = false
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -68,7 +65,6 @@ class CollapsibleConstraintLayout : ConstraintLayout, AppBarLayout.OnOffsetChang
     }
 
 
-
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         if (parent is AppBarLayout) {
@@ -83,20 +79,33 @@ class CollapsibleConstraintLayout : ConstraintLayout, AppBarLayout.OnOffsetChang
             return
         }
 
-        if (iconInitialPosition == null) {
+        if (positionsInitialized.not()) {
             iconInitialPosition = iv_icon.x
+            iconMaxPosition = appBarLayout?.width?.toFloat()?.plus(iv_icon.width / 2)
+            icon2InitialPosition = iv_icon2.x
+            icon2MaxPosition = appBarLayout?.width?.toFloat()?.plus(iv_icon2.width / 2)
+            positionsInitialized = true
+            Log.i(
+                "Sergio> ",
+                "iconInitialPosition: $iconInitialPosition icon2InitialPosition $icon2InitialPosition iconMaxPosition $iconMaxPosition"
+            )
         }
-        if (iconMaxPosition == null) {
-            iconMaxPosition = appBarLayout?.width?.toFloat()
-        }
+
 
         mLastPosition = verticalOffset
-        val progress = verticalOffset / appBarLayout?.height?.toFloat()!!
+        val progress = -verticalOffset / appBarLayout?.height?.toFloat()!!
 
         val iconProgress = (iconMaxPosition!! - iconInitialPosition!!) * progress
-        iv_icon?.x = -iconProgress + iconInitialPosition!!
+        val iconPosition = iconInitialPosition!! + iconProgress
+        iv_icon?.x = iconPosition
 
-        Log.i("Sergio> ", "iconProgress: $iconProgress verticalOffset: $verticalOffset iconInitialPosition: $iconInitialPosition")
+        val icon2Progress = (icon2MaxPosition!! - iconPosition) * progress
+        val icon2Position = icon2InitialPosition!! + icon2Progress
+        iv_icon2?.x = icon2Position
+
+        Log.i("Sergio> ", "progress: ${progress * 100}% \n")
+        Log.i("Sergio> ", "iconProgress $iconProgress iconPosition $iconPosition")
+        Log.i("Sergio> ", "icon2Progress $icon2Progress icon2Position $icon2Position")
 
         val params = layoutParams as AppBarLayout.LayoutParams
         params.topMargin = -verticalOffset

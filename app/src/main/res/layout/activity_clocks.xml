@@ -79,5 +79,5 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_begin="130dp"/>
+        app:layout_constraintGuide_begin="10dp"/>
 </android.support.constraint.ConstraintLayout>
